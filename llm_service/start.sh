@@ -17,10 +17,12 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-# Pull the model if it isn't already on the persistent disk.
+# Pull the model in the BACKGROUND if not already present. This lets llm_api bind
+# the port immediately so Render's health check passes; /analyze just errors until
+# the pull finishes (a minute or two on first boot without a persistent disk).
 if ! ollama list | grep -q "${MODEL%%:*}"; then
-  echo "pulling $MODEL ..."
-  ollama pull "$MODEL"
+  echo "pulling $MODEL in background ..."
+  ( ollama pull "$MODEL" && echo "model $MODEL ready" ) &
 fi
 
 # Hand off to the Python access layer (foreground = container's main process).

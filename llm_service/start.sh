@@ -4,7 +4,8 @@ set -e
 
 # Force the model in code: Render's LLM_MODEL env var can't be changed via CLI after
 # service creation, so we export it here to override whatever was set at create time.
-export LLM_MODEL="qwen3:4b"
+# 1.7b fits Pro 4GB. 4b/8b need Pro Plus 8GB+ (4b OOMs on 4GB — verified 2026-06-09).
+export LLM_MODEL="qwen3:1.7b"
 MODEL="$LLM_MODEL"
 
 # Memory hygiene for small CPU instances: keep one model resident (avoid reload

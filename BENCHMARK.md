@@ -68,8 +68,13 @@ chosen to keep cost down. Bigger local models close it while staying 100% privat
 | Local model | Render plan | Expected accuracy |
 |---|---|---|
 | Qwen3 1.7B (tested) | Pro 4 GB | weak — misses findings |
-| Qwen3 4B | Pro Plus 8 GB | ≈ Groq on most |
+| Qwen3 4B | **Pro Plus 8 GB** | ≈ Groq on most |
 | Qwen3 8B / 14B | Pro Max 16 GB | ≈ Groq/Claude, fully private |
+
+**4B on Pro 4 GB — attempted 2026-06-09:** deployed and loaded, but inference is
+unstable (intermittent 502 / empty output) — out-of-memory under KV-cache pressure
+on 4 GB. Confirms 4B requires **Pro Plus 8 GB**. Reverted the live service to the
+stable 1.7B. The 4B/8B accuracy benchmark is gated on the plan bump.
 
 Method note: n=1 document pair, illustrative. Latency measured end-to-end against
 the deployed services. Re-run on Qwen3 4B/8B updates the accuracy row to 🟢.

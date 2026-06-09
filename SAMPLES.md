@@ -195,6 +195,36 @@ GET /compare-drive?file_ids=1rXPINNlWkkDKYywCjqd5lnJCMKltJbeH,1k3L6SBO0JCd8ArEVC
 
 ---
 
+## Big files & version pairs
+
+The largest files in the Drive (up to 80 KB), compared successfully. On Groq's free
+tier these need to be spaced ~1/min (per-minute token budget) and each document is
+read up to the first ~15 KB; for unlimited size/volume use the local OakmoreLabsAI
+engine or a paid tier.
+
+**Sample G — Family Matters, 70 KB version pair** (`Home Service` vs `Home Services`)
+→ `green`, **no differences** — the two revisions are identical.
+
+**Sample H — Transco Lines v1 vs v2** → `red`:
+```json
+{"field": "Annual Salary", "values": {"v1": "detailed", "v2": "0.00 for all employees"},
+ "severity": "red", "note": "v2 is an empty/template version — all values zero."}
+```
+
+**Sample I — American R&C original vs `Updated ara`** → `yellow`: state taxes, health
+contributions, and 401-k/Medicare deductions differ between the two revisions.
+
+**Sample J — Township of Parsippany (80 KB) proposal vs census** → `yellow`: label
+mismatch (`Annual Salary` vs `Gross Annual TAXABLE Wages`) and differing detail levels.
+
+**Sample K — Nissan Guam proposal vs census** → `red`:
+```json
+{"field": "Employee Count", "values": {"Nissan Guam.xlsx": "around 40", "Master Census": "around 80"},
+ "severity": "red", "note": "Significant difference in number of employees listed."}
+```
+
+---
+
 ## Document types available in this Drive
 
 The connected Drive currently holds only Attentive proposal-tool spreadsheets

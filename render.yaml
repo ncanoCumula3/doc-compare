@@ -1,0 +1,60 @@
+# Render blueprint: 3 services from one repo.
+# Deploy with: Render Dashboard -> New -> Blueprint -> point at this repo.
+# NOTE: pushing to the deploy branch auto-deploys. Set the secret env vars in the
+# dashboard (marked sync:false below) before first deploy.
+
+services:
+  # 1) Local LLM: Ollama + Qwen3 4B + thin Python access layer.
+  - type: web
+    name: doc-compare-llm
+    runtime: docker
+    rootDir: llm_service
+    dockerfilePath: ./Dockerfile
+    plan: pro            # 4 GB RAM — Qwen3 4B needs it (CPU-only on Render)
+    disk:
+      name: ollama-models
+      mountPath: /root/.ollama
+      sizeGB: 10         # persist model weights across deploys (~$0.25/GB)
+    envVars:
+      - key: LLM_MODEL
+        value: qwen3:4b
+
+  # 2) Compare-core: reusable LLM-backed comparison engine.
+  - type: web
+    name: doc-compare-core
+    runtime: python
+    rootDir: compare_service
+    plan: standard
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 app.py
+    envVars:
+      - key: LLM_BACKEND
+        value: ollama          # flip to "groq" if CPU inference is too slow
+      - key: LLM_SERVICE_URL
+        fromService:
+          type: web
+          name: doc-compare-llm
+          property: hostport    # internal address of the LLM service
+      - key: GROQ_API_KEY
+        sync: false             # set in dashboard (same key as the payroll app)
+      - key: GROQ_MODEL
+        # llama-4-scout: highest free-tier TPM limit, handles real docs.
+        # qwen/qwen3-32b also works but is capped at 6000 TPM on the free tier.
+        value: meta-llama/llama-4-scout-17b-16e-instruct
+
+  # 3) Drive-intake: public entrypoint. Takes 3 Drive file ids, returns one JSON.
+  - type: web
+    name: doc-compare-drive
+    runtime: python
+    rootDir: drive_service
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 app.py
+    envVars:
+      - key: COMPARE_SERVICE_URL
+        fromService:
+          type: web
+          name: doc-compare-core
+          property: hostport
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false             # paste the same service-account JSON the payroll app uses

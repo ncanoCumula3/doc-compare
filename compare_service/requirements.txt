@@ -1,0 +1,4 @@
+# compare_service uses the Python standard library (http.server, urllib, json).
+# certifi is the only dependency — it supplies a CA bundle so the Groq HTTPS call
+# verifies on hosts without a system bundle (e.g. macOS). Harmless elsewhere.
+certifi>=2024.0

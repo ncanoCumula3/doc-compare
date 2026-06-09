@@ -1,0 +1,11 @@
+# NEVER commit credentials
+service-account.json
+.env
+
+# caches / artifacts
+**/_drive_cache/
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+venv/

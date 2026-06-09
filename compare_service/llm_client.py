@@ -41,7 +41,7 @@ LLM_SERVICE_URL = os.environ.get("LLM_SERVICE_URL", "https://doc-compare-llm.onr
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_BASE = os.environ.get("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
-GROQ_MAX_TOKENS = int(os.environ.get("GROQ_MAX_TOKENS", "3000"))
+GROQ_MAX_TOKENS = int(os.environ.get("GROQ_MAX_TOKENS", "2000"))
 
 
 def _call_ollama(system, prompt):

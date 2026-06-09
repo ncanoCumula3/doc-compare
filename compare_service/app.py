@@ -31,7 +31,7 @@ from prompt import SYSTEM, build_prompt
 
 PORT = int(os.environ.get("PORT", "8001"))
 # Cap per-document text so we stay inside a small model's context window.
-MAX_CHARS = int(os.environ.get("MAX_DOC_CHARS", "24000"))
+MAX_CHARS = int(os.environ.get("MAX_DOC_CHARS", "15000"))
 
 
 def compare(documents):

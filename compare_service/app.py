@@ -14,7 +14,17 @@ Pure stdlib. Calling this directly with payroll docs + a census doc IS the
 
 import json
 import os
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+# Optional CLI overrides, applied BEFORE importing llm_client (which reads these
+# at import time). Args win over env vars — Render honors start-command args
+# reliably, whereas inline `VAR=val cmd` env prefixes are not applied.
+#   python3 app.py [backend] [llm_service_url]
+if len(sys.argv) > 1 and sys.argv[1]:
+    os.environ["LLM_BACKEND"] = sys.argv[1]
+if len(sys.argv) > 2 and sys.argv[2]:
+    os.environ["LLM_SERVICE_URL"] = sys.argv[2]
 
 import llm_client
 from prompt import SYSTEM, build_prompt

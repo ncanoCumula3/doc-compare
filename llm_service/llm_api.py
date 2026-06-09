@@ -27,6 +27,11 @@ TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "180"))
 
 def _ollama_generate(system, prompt, want_json):
     """Call Ollama /api/generate (non-streaming) and return the text."""
+    # Qwen3 is a hybrid "thinking" model. Its reasoning tokens collide with Ollama's
+    # JSON grammar (format=json), making it emit an empty {} and waste time. /no_think
+    # disables thinking so it produces direct JSON quickly. Harmless on non-Qwen models.
+    if MODEL.startswith("qwen3"):
+        prompt = "/no_think\n" + prompt
     payload = {
         "model": MODEL,
         "prompt": prompt,

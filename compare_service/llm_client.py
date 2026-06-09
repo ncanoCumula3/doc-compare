@@ -23,11 +23,16 @@ try:
 except Exception:
     _SSL = ssl.create_default_context()
 
-BACKEND = os.environ.get("LLM_BACKEND", "ollama").lower()
+# Backend selection. NOTE: on Render the service env var LLM_BACKEND is pinned to
+# "groq" and the CLI cannot change env vars or the start command after creation, so
+# we deliberately do NOT read LLM_BACKEND. The default lives in code; override with
+# LLM_BACKEND_OVERRIDE (settable in the dashboard) if you ever need to.
+DEFAULT_BACKEND = "ollama"
+BACKEND = os.environ.get("LLM_BACKEND_OVERRIDE", DEFAULT_BACKEND).lower()
 TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "180"))
 
-# ollama backend (local LLM access layer)
-LLM_SERVICE_URL = os.environ.get("LLM_SERVICE_URL", "http://127.0.0.1:8000")
+# ollama backend (local LLM access layer) — defaults to the deployed Render service
+LLM_SERVICE_URL = os.environ.get("LLM_SERVICE_URL", "https://doc-compare-llm.onrender.com")
 
 # groq backend (hosted open models — same key as the payroll app).
 # Default to llama-4-scout: it's the one Groq model whose free-tier TPM limit is

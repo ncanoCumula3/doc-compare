@@ -121,6 +121,80 @@ GET /compare-drive?file_ids=17AkdSALUiTkrA_3wsQ5nDMzY4DQC3rrh,1F4qnrXMw7vQAg0lV0
 
 ---
 
+## Sample D — 3-version chain (one client, three revisions)
+
+**Request**
+```
+GET /compare-drive?file_ids=1jkyNUigkycmCJLIC-AWWOF8kV_BQhNxt,1rrLbnyIyHBxdymf1-VZkxWEFOaWQ7T4o,1fZrz9FnOokpsevI8pTc8pe3c7w5On6UJ
+```
+(Roth Farms additions v1, v2, reviewed `ara`)
+
+**Response** (key part)
+```json
+{
+  "comparison": {
+    "overall_status": "yellow",
+    "summary": "The documents largely agree but have some formatting and minor data differences.",
+    "matches": ["Employee names and IDs match", "Annual salaries match", "State/location consistent"],
+    "differences": [
+      {"field": "Column names and order", "values": {"v1/v2": "First Name, Last Name, Annual Salary...", "ara": "Client Name, Employee Last Name, Employee First Name..."}, "severity": "yellow", "note": "Reworked layout, same underlying info"},
+      {"field": "Group Health (Employee Monthly Contribution)", "values": {"v1/v2": "Not present in this format", "ara": "771.05"}, "severity": "yellow", "note": "Field added in the reviewed version"}
+    ]
+  }
+}
+```
+
+---
+
+## Sample E — cross-industry odd-one-out (real data-quality catch)
+
+**Request**
+```
+GET /compare-drive?file_ids=1clIH2fiouZ_rI6jHEZn0BN6X3tIv8fXC,1OtOTufzqOA9rt1m5cnXJr9jbsH7iWgRt,1U4y_jLVaHJGVDMccpQSXhOasPIRAuoa2
+```
+(Transco Lines [trucking] + AVS Audio Engineering + Joe's Pizza)
+
+**Response** (key part)
+```json
+{
+  "comparison": {
+    "overall_status": "yellow",
+    "summary": "Similar payroll reports, with differences in employee info, salary and tax.",
+    "differences": [
+      {"field": "Annual Salary", "values": {"Transco Lines.xlsx": "all 0.00", "AVS Audio Engineering.xlsx": "varies (65000, 37440)", "Joe's Pizza.xlsx": "varies (2018, 3471)"}, "severity": "red", "note": "Annual salary is 0.00 for ALL employees in Transco Lines — likely a data error."},
+      {"field": "Work State", "values": {"Transco Lines.xlsx": "varies (OK, MS, AR)", "AVS Audio Engineering.xlsx": "all AL", "Joe's Pizza.xlsx": "all IL"}, "severity": "red", "note": "Multi-state vs single-state operations."}
+    ]
+  }
+}
+```
+> Note: caught that **Transco Lines has $0.00 salary for every employee** — a real data-quality flag, surfaced with no rule written for it.
+
+---
+
+## Sample F — proposal vs census, material RED finding
+
+**Request**
+```
+GET /compare-drive?file_ids=1rXPINNlWkkDKYywCjqd5lnJCMKltJbeH,1k3L6SBO0JCd8ArEVCbULoAgf3CoVshRZ
+```
+(Marco Plastics proposal.xlsx + Master Census.xlsx)
+
+**Response** (key part)
+```json
+{
+  "comparison": {
+    "overall_status": "yellow",
+    "differences": [
+      {"field": "Gross Annual Wages", "values": {"proposal": "52000.00, 50000.08, 37440.00, 61347.00", "census": "52000, 50000.08, 37440, 61347"}, "severity": "green", "note": "Identical, minor rounding."},
+      {"field": "Employee Monthly Contribution (Health)", "values": {"proposal": "89, 89, 89, 89", "census": "29.62, 22.97, 29.62, 279.65"}, "severity": "red", "note": "Significant discrepancy in health contributions — proposal uses a flat 89, census has actuals."},
+      {"field": "401-k/IRA Monthly Amount", "values": {"proposal": "230.5, 219.83, 208.01, 322.3", "census": "Not directly comparable"}, "severity": "yellow", "note": "401k present in proposal, absent in census."}
+    ]
+  }
+}
+```
+
+---
+
 ## Document types available in this Drive
 
 The connected Drive currently holds only Attentive proposal-tool spreadsheets

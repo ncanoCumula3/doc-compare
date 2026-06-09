@@ -29,7 +29,7 @@ except Exception:
 # LLM_BACKEND_OVERRIDE (settable in the dashboard) if you ever need to.
 DEFAULT_BACKEND = "ollama"
 BACKEND = os.environ.get("LLM_BACKEND_OVERRIDE", DEFAULT_BACKEND).lower()
-TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "180"))
+TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "600"))
 
 # ollama backend (local LLM access layer) — defaults to the deployed Render service
 LLM_SERVICE_URL = os.environ.get("LLM_SERVICE_URL", "https://doc-compare-llm.onrender.com")

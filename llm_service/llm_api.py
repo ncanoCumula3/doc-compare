@@ -22,7 +22,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
 MODEL = os.environ.get("LLM_MODEL", "qwen3:4b")
 PORT = int(os.environ.get("PORT", "8000"))
-TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "180"))
+TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "600"))
 
 
 def _ollama_generate(system, prompt, want_json):

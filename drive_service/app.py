@@ -26,7 +26,7 @@ import extract
 
 PORT = int(os.environ.get("PORT", "8002"))
 COMPARE_URL = os.environ.get("COMPARE_SERVICE_URL", "http://127.0.0.1:8001")
-TIMEOUT = int(os.environ.get("COMPARE_TIMEOUT", "200"))
+TIMEOUT = int(os.environ.get("COMPARE_TIMEOUT", "600"))
 
 
 def _parse_ids(path, body):

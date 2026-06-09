@@ -2,7 +2,10 @@
 # Start Ollama, ensure the model is present, then run the Python access layer.
 set -e
 
-MODEL="${LLM_MODEL:-qwen3:4b}"
+# Force the model in code: Render's LLM_MODEL env var can't be changed via CLI after
+# service creation, so we export it here to override whatever was set at create time.
+export LLM_MODEL="qwen3:4b"
+MODEL="$LLM_MODEL"
 
 # Memory hygiene for small CPU instances: keep one model resident (avoid reload
 # churn), serialize requests, cap loaded models. Reduces peak RAM / OOM risk.

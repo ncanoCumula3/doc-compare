@@ -4,6 +4,12 @@ set -e
 
 MODEL="${LLM_MODEL:-qwen3:4b}"
 
+# Memory hygiene for small CPU instances: keep one model resident (avoid reload
+# churn), serialize requests, cap loaded models. Reduces peak RAM / OOM risk.
+export OLLAMA_KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:--1}"
+export OLLAMA_NUM_PARALLEL="${OLLAMA_NUM_PARALLEL:-1}"
+export OLLAMA_MAX_LOADED_MODELS="${OLLAMA_MAX_LOADED_MODELS:-1}"
+
 # Start the Ollama server in the background.
 ollama serve &
 OLLAMA_PID=$!

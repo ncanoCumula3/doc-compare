@@ -65,17 +65,19 @@ class Handler(BaseHTTPRequestHandler):
         try:
             n = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(n) or b"{}")
-        except Exception as e:
-            return self._send(400, {"error": f"bad json: {e}"})
+        except Exception:
+            return self._send(400, {"error": "invalid request"})
         documents = body.get("documents")
         if not documents or not isinstance(documents, list):
             return self._send(400, {"error": "missing 'documents' list"})
         try:
             self._send(200, compare(documents))
         except Exception as e:
-            self._send(502, {"error": f"compare failed: {e.__class__.__name__}: {e}"})
+            # Detail to server logs only; client gets a clean, white-labelled message.
+            print(f"[OakmoreLabsAI] compare error: {e.__class__.__name__}: {e}")
+            self._send(502, {"error": "OakmoreLabsAI could not process the comparison"})
 
 
 if __name__ == "__main__":
-    print(f"compare-core on :{PORT} llm={llm_client.backend_info()}")
+    print("compare-core on :%d (provider: OakmoreLabsAI)" % PORT)
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()

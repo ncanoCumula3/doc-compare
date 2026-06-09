@@ -37,7 +37,13 @@ def _ollama_generate(system, prompt, want_json):
         "prompt": prompt,
         "system": system or "",
         "stream": False,
-        "options": {"temperature": 0.1},
+        # Bound memory + runtime on small CPU instances: cap context window (limits
+        # KV-cache RAM) and output length. Tunable via env.
+        "options": {
+            "temperature": 0.1,
+            "num_ctx": int(os.environ.get("LLM_NUM_CTX", "8192")),
+            "num_predict": int(os.environ.get("LLM_NUM_PREDICT", "1536")),
+        },
     }
     if want_json:
         payload["format"] = "json"
@@ -64,7 +70,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.startswith("/health"):
-            return self._send(200, {"ok": True, "model": MODEL, "backend": OLLAMA_URL})
+            # White-labelled: no model/engine names exposed.
+            return self._send(200, {"ok": True, "provider": "OakmoreLabsAI"})
         self._send(404, {"error": "not found"})
 
     def do_POST(self):
@@ -73,8 +80,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             n = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(n) or b"{}")
-        except Exception as e:
-            return self._send(400, {"error": f"bad json: {e}"})
+        except Exception:
+            return self._send(400, {"error": "invalid request"})
         prompt = body.get("prompt") or ""
         if not prompt:
             return self._send(400, {"error": "missing 'prompt'"})
@@ -82,9 +89,10 @@ class Handler(BaseHTTPRequestHandler):
             text = _ollama_generate(body.get("system", ""), prompt, bool(body.get("json")))
             self._send(200, {"text": text})
         except Exception as e:
-            self._send(502, {"error": f"llm call failed: {e.__class__.__name__}: {e}"})
+            print(f"[OakmoreLabsAI] analyze error: {e.__class__.__name__}: {e}")  # server log only
+            self._send(502, {"error": "OakmoreLabsAI request failed"})
 
 
 if __name__ == "__main__":
-    print(f"llm_api on :{PORT} -> Ollama {OLLAMA_URL} model {MODEL}")
+    print(f"OakmoreLabsAI access layer on :{PORT}")
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()

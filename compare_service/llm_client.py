@@ -23,11 +23,11 @@ try:
 except Exception:
     _SSL = ssl.create_default_context()
 
-# Backend selection. NOTE: on Render the service env var LLM_BACKEND is pinned to
-# "groq" and the CLI cannot change env vars or the start command after creation, so
-# we deliberately do NOT read LLM_BACKEND. The default lives in code; override with
-# LLM_BACKEND_OVERRIDE (settable in the dashboard) if you ever need to.
-DEFAULT_BACKEND = "ollama"
+# Backend selection. NOTE: the Render service env var LLM_BACKEND can't be changed
+# via the CLI after creation, so we deliberately do NOT read it. The default lives in
+# code. Day-to-day default is "groq" (fast, reliable). To switch to the local Qwen3
+# service on demand, set LLM_BACKEND_OVERRIDE=ollama in the dashboard (no code change).
+DEFAULT_BACKEND = "groq"
 BACKEND = os.environ.get("LLM_BACKEND_OVERRIDE", DEFAULT_BACKEND).lower()
 TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "600"))
 
@@ -55,7 +55,7 @@ def _call_ollama(system, prompt):
 
 def _call_groq(system, prompt):
     if not GROQ_API_KEY:
-        raise RuntimeError("LLM_BACKEND=groq but GROQ_API_KEY is not set")
+        raise RuntimeError("OakmoreLabsAI is not configured")
     payload = json.dumps({
         "model": GROQ_MODEL,
         "messages": [
@@ -100,5 +100,5 @@ def _parse_json(text):
 
 
 def backend_info():
-    return {"backend": BACKEND,
-            "target": GROQ_MODEL if BACKEND == "groq" else LLM_SERVICE_URL}
+    # White-labelled: never expose the underlying provider/model to callers.
+    return {"provider": "OakmoreLabsAI"}

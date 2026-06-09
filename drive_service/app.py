@@ -87,13 +87,16 @@ class Handler(BaseHTTPRequestHandler):
                                     "?file_ids=a,b,c or JSON {\"file_ids\":[...]}"})
         try:
             self._send(200, _run(ids))
+        except RuntimeError as e:
+            # Drive-file issues (bad id / not shared) — brand-safe, user-actionable.
+            self._send(502, {"error": str(e)})
         except Exception as e:
-            self._send(502, {"error": f"{e.__class__.__name__}: {e}"})
+            print(f"[OakmoreLabsAI] drive error: {e.__class__.__name__}: {e}")  # server log only
+            self._send(502, {"error": "OakmoreLabsAI could not process the request"})
 
     def do_GET(self):
         if self.path.startswith("/health"):
-            return self._send(200, {"ok": True, "drive": drive.configured(),
-                                    "compare": COMPARE_URL})
+            return self._send(200, {"ok": True, "drive": drive.configured()})
         self._handle({})
 
     def do_POST(self):

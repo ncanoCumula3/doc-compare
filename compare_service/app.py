@@ -34,12 +34,34 @@ PORT = int(os.environ.get("PORT", "8001"))
 MAX_CHARS = int(os.environ.get("MAX_DOC_CHARS", "15000"))
 
 
+_SEV = {"green": 0, "yellow": 1, "red": 2}
+_SEV_NAME = ["green", "yellow", "red"]
+
+
+def reconcile_status(result):
+    """The model reliably scores each difference but is unreliable at rolling the
+    top-line status up (it tends to leave overall_status green even with red
+    differences). Derive overall_status deterministically = worst difference
+    severity. Never downgrades an explicit model red."""
+    try:
+        comp = result.get("comparison") or {}
+        worst = 0
+        for d in comp.get("differences") or []:
+            worst = max(worst, _SEV.get(str(d.get("severity", "green")).lower(), 0))
+        current = _SEV.get(str(comp.get("overall_status", "green")).lower(), 0)
+        comp["overall_status"] = _SEV_NAME[max(worst, current)]
+        result["comparison"] = comp
+    except Exception:
+        pass
+    return result
+
+
 def compare(documents):
     docs = [{"name": d.get("name", f"doc{i+1}"),
              "text": (d.get("text") or "")[:MAX_CHARS]}
             for i, d in enumerate(documents)]
     prompt = build_prompt(docs)
-    return llm_client.analyze_json(SYSTEM, prompt)
+    return reconcile_status(llm_client.analyze_json(SYSTEM, prompt))
 
 
 class Handler(BaseHTTPRequestHandler):

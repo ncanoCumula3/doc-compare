@@ -1,0 +1,5 @@
+employee_id,name,plan_tier,monthly_premium
+1001,Alice Chen,Employee Only,420.00
+1002,Bob Diaz,Employee+Spouse,780.00
+1003,Carla Wu,Family,1150.00
+1004,Dan Ford,Employee Only,420.00

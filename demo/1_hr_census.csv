@@ -1,0 +1,6 @@
+employee_id,name,plan_tier,date_of_birth,hire_date
+1001,Alice Chen,Employee Only,1988-03-12,2019-06-01
+1002,Bob Diaz,Family,1979-11-02,2015-02-15
+1003,Carla Wu,Family,1990-07-21,2021-09-01
+1004,Dan Ford,Employee Only,1985-01-30,2018-04-10
+1005,Eve Novak,Employee+Spouse,1992-05-18,2023-01-09
